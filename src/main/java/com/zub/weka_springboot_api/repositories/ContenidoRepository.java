@@ -4,6 +4,10 @@ import com.zub.weka_springboot_api.models.RepContenido;
 import com.zub.weka_springboot_api.models.Contenido;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationExpression;
+import org.springframework.data.mongodb.core.aggregation.ComparisonOperators;
+import org.springframework.data.mongodb.core.aggregation.ConditionalOperators;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
@@ -24,7 +28,43 @@ public class ContenidoRepository implements ContenidoRep {
 
     @Override
     public List<RepContenido> findDescribe(Pageable pageable) {
-        return null;
+
+        AggregationExpression mapRating = ConditionalOperators.switchCases(
+                ConditionalOperators.Switch.CaseOperator.when(ComparisonOperators.valueOf("rating").equalToValue("TV-Y")).then(1),
+                ConditionalOperators.Switch.CaseOperator.when(ComparisonOperators.valueOf("rating").equalToValue("TV-Y7")).then(2),
+                ConditionalOperators.Switch.CaseOperator.when(ComparisonOperators.valueOf("rating").equalToValue("TV-Y7FV")).then(3),
+                ConditionalOperators.Switch.CaseOperator.when(ComparisonOperators.valueOf("rating").equalToValue("TV-G")).then(4),
+                ConditionalOperators.Switch.CaseOperator.when(ComparisonOperators.valueOf("rating").equalToValue("G")).then(4),
+                ConditionalOperators.Switch.CaseOperator.when(ComparisonOperators.valueOf("rating").equalToValue("TV-PG")).then(5),
+                ConditionalOperators.Switch.CaseOperator.when(ComparisonOperators.valueOf("rating").equalToValue("PG")).then(5),
+                ConditionalOperators.Switch.CaseOperator.when(ComparisonOperators.valueOf("rating").equalToValue("TV-14")).then(6),
+                ConditionalOperators.Switch.CaseOperator.when(ComparisonOperators.valueOf("rating").equalToValue("PG-13")).then(6),
+                ConditionalOperators.Switch.CaseOperator.when(ComparisonOperators.valueOf("rating").equalToValue("NC-17")).then(7),
+                ConditionalOperators.Switch.CaseOperator.when(ComparisonOperators.valueOf("rating").equalToValue("TV-MA")).then(7),
+                ConditionalOperators.Switch.CaseOperator.when(ComparisonOperators.valueOf("rating").equalToValue("R")).then(8)
+                //ConditionalOperators.Switch.CaseOperator.when(ComparisonOperators.valueOf("qty").greaterThanEqualToValue(100)).then("WARNING"),
+                //ConditionalOperators.Switch.CaseOperator.when(ComparisonOperators.valueOf("qty").equalToValue(0)).then("EMPTY")
+        ).defaultTo(-1);
+
+        return mongoTemplate.aggregate(
+                Aggregation.newAggregation(
+                        Aggregation.project("type","release_year","_id")
+
+                                .and(ConditionalOperators.Cond.when(
+                                        ComparisonOperators.Eq.valueOf("type").equalTo("Movie")
+                                ).then(1).otherwise(2)
+                                ).as("type")
+
+                                .and(
+                                        mapRating
+                                ).as("rating")
+                )
+                ,"contenido",RepContenido.class).getMappedResults();
     }
 
+    //         return mongoTemplate.aggregate(,"contenido",RepContenido.class).getMappedResults();
+
+    /*
+
+    * */
 }
