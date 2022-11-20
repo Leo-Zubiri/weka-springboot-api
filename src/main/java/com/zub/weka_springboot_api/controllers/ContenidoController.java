@@ -39,27 +39,12 @@ public class ContenidoController {
     @PostMapping("/recommendations")
     public List<RepContenido> eval(@RequestBody List<RepContenido> repContenido) throws Exception {
 
-        // Creacion del data set csv
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        JsonNode jsonNode = objectMapper.readTree(
-                objectMapper.writeValueAsBytes(repContenido.toArray())
-        );
-
-        CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder();
-        JsonNode firstObject = jsonNode.elements().next();
-        firstObject.fieldNames().forEachRemaining(fieldName -> {csvSchemaBuilder.addColumn(fieldName);});
-
-        CsvSchema csvSchema = csvSchemaBuilder.build().withHeader();
-
-        CsvMapper csvMapper = new CsvMapper();
-        csvMapper.writerFor(JsonNode.class)
-                .with(csvSchema)
-                .writeValue(new File("src/main/resources/test.csv"),jsonNode);
+        ApplyWeka.RequestToCSV(repContenido.toArray(),"src/main/resources/test.csv");
 
         ApplyWeka.csvToArff("src/main/resources/test.csv","src/main/resources/test.arff");
 
-        ApplyWeka.KNN("src/main/resources/test.arff","src/main/resources/data.arff");
+        ApplyWeka.Recommendations("src/main/resources/test.arff","src/main/resources/data.arff");
+
         return repContenido;
     }
 }
