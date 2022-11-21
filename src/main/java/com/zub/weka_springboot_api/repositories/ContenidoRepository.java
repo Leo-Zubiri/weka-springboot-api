@@ -29,6 +29,7 @@ public class ContenidoRepository implements ContenidoRep {
     @Override
     public List<RepContenido> findDescribe(Pageable pageable) {
 
+        /*
         AggregationExpression mapRating = ConditionalOperators.switchCases(
                 ConditionalOperators.Switch.CaseOperator.when(ComparisonOperators.valueOf("rating").equalToValue("TV-Y")).then(1),
                 ConditionalOperators.Switch.CaseOperator.when(ComparisonOperators.valueOf("rating").equalToValue("TV-Y7")).then(2),
@@ -45,11 +46,13 @@ public class ContenidoRepository implements ContenidoRep {
                 //ConditionalOperators.Switch.CaseOperator.when(ComparisonOperators.valueOf("qty").greaterThanEqualToValue(100)).then("WARNING"),
                 //ConditionalOperators.Switch.CaseOperator.when(ComparisonOperators.valueOf("qty").equalToValue(0)).then("EMPTY")
         ).defaultTo(-1);
-
+        */
         return mongoTemplate.aggregate(
                 Aggregation.newAggregation(
-                        Aggregation.project("type","release_year","_id")
+                        Aggregation.project("_id","popular_rank","certificate","startYear","endYear","episodes",
+                                "runtime","type","orign_country","language","rating","numVotes","genres")
 
+                                /*
                                 .and(ConditionalOperators.Cond.when(
                                         ComparisonOperators.Eq.valueOf("type").equalTo("Movie")
                                 ).then(1).otherwise(2)
@@ -57,14 +60,12 @@ public class ContenidoRepository implements ContenidoRep {
 
                                 .and(
                                         mapRating
-                                ).as("rating")
+                                ).as("rating")*/
                 )
                 ,"contenido",RepContenido.class).getMappedResults();
+
+
+        //return mongoTemplate.aggregate(, "contenido", RepContenido.class).getMappedResults();
+
     }
-
-    //         return mongoTemplate.aggregate(,"contenido",RepContenido.class).getMappedResults();
-
-    /*
-
-    * */
 }

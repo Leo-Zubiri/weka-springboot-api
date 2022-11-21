@@ -12,6 +12,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVLoader;
+import weka.core.converters.CSVSaver;
 import weka.core.converters.ConverterUtils;
 import weka.core.neighboursearch.KDTree;
 import weka.filters.Filter;
@@ -33,6 +34,15 @@ public abstract class ApplyWeka {
         ArffSaver saver = new ArffSaver();
         saver.setInstances(data);
         saver.setFile(fileArrf);
+        saver.writeBatch();
+    }
+
+    public static void ArffToCsv(Instances dataset,String fullpath) throws IOException {
+        // save CSV
+        CSVSaver saver = new CSVSaver();
+        saver.setInstances(dataset);//set the dataset we want to convert
+        //and save as CSV
+        saver.setFile(new File(fullpath));
         saver.writeBatch();
     }
 

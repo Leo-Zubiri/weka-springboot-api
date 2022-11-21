@@ -39,9 +39,9 @@ public class ContenidoController {
     @PostMapping("/recommendations")
     public List<RepContenido> eval(@RequestBody List<RepContenido> repContenido) throws Exception {
 
-        ApplyWeka.RequestToCSV(repContenido.toArray(),"src/main/resources/test.csv");
+        //ApplyWeka.RequestToCSV(repContenido.toArray(),"src/main/resources/test.csv");
 
-        ApplyWeka.csvToArff("src/main/resources/test.csv","src/main/resources/test.arff");
+        //ApplyWeka.csvToArff("src/main/resources/test.csv","src/main/resources/test.arff");
 
         ApplyWeka.Recommendations("src/main/resources/test.arff","src/main/resources/data.arff");
 
