@@ -8,12 +8,14 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationExpression;
 import org.springframework.data.mongodb.core.aggregation.ComparisonOperators;
 import org.springframework.data.mongodb.core.aggregation.ConditionalOperators;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class ContenidoRepository implements ContenidoRep {
@@ -24,6 +26,13 @@ public class ContenidoRepository implements ContenidoRep {
     @Override
     public List<Contenido> findAll(Pageable pageable) {
         return mongoTemplate.find(new Query().with(pageable), Contenido.class);
+    }
+
+    @Override
+    public Contenido findByID(String id){
+        Contenido contenido = mongoTemplate.findOne(new Query(Criteria.where("_id").is(id)), Contenido.class);
+        //System.out.println(contenido);
+        return contenido;
     }
 
     @Override

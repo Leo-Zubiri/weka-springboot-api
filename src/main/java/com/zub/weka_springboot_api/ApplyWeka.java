@@ -20,6 +20,7 @@ import weka.filters.unsupervised.attribute.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Random;
 
 public abstract class ApplyWeka {
@@ -78,7 +79,13 @@ public abstract class ApplyWeka {
         SaveInstanceToArff(res,"src/main/resources/datasetWithClasses.arff");
         */
 
-        KDTree("src/main/resources/datasetWithClasses.arff",test);
+        KDTree("src/main/resources/datasetWithClasses.arff", 8,3);
+    }
+
+    public static Instances LoadDatasetArff(String datasetPath) throws Exception {
+        ConverterUtils.DataSource source = new ConverterUtils.DataSource(datasetPath);
+        Instances dataset = source.getDataSet();
+        return dataset;
     }
 
     public static void SaveInstanceToArff(Instances instance, String fullStringPath) throws Exception {
@@ -159,7 +166,7 @@ public abstract class ApplyWeka {
                 .writeValue(new File(fullPath),jsonNode);
     }
 
-    public static void KDTree(String datasetFullPath, Instances test) throws Exception {
+    public static ArrayList<String> KDTree(String datasetFullPath, int numInstance, int numNeighbors) throws Exception {
 
         /**
          * Expects a dataset as first parameter. The last attribute is used as class attribute
@@ -174,6 +181,9 @@ public abstract class ApplyWeka {
         Instances dataset = source.getDataSet();
         dataset.setClassIndex(dataset.numAttributes() - 1);
 
+        Instance inst = dataset.instance(numInstance);
+        //dataset.remove(numInstance);
+
         // initialize KDTree
         EuclideanDistance distfunc = new EuclideanDistance();
         distfunc.setAttributeIndices("2-last");
@@ -182,16 +192,27 @@ public abstract class ApplyWeka {
         kdtree.setInstances(dataset);
 
         // obtain neighbors for a random instance
-        Random rand = dataset.getRandomNumberGenerator(42);
-        Instance inst = dataset.instance(rand.nextInt(dataset.numInstances()));
-        Instances neighbors = kdtree.kNearestNeighbours(inst, 5);
+        //Random rand = dataset.getRandomNumberGenerator(42);
+
+        Instances neighbors = kdtree.kNearestNeighbours(inst, numNeighbors);
+
         double[] distances = kdtree.getDistances();
         System.out.println("Neighbors data has " + neighbors.numAttributes() + " attributes.");
         System.out.println("\nInstance:\n" + inst);
         System.out.println("\nNeighbors:");
-        for (int i = 0; i < neighbors.numInstances(); i++)
-            System.out.println((i+1) + ". distance=" + distances[i] + "\n   " + neighbors.instance(i) + "");
 
+        ArrayList<String> contenidoIDs = new ArrayList<>();
+
+        //for (int i = 0; i < neighbors.numInstances(); i++) {
+        for (int i = 0; i < numNeighbors; i++) {
+            System.out.println((i + 1) + ". distance=" + distances[i] + "\n   " + neighbors.instance(i) + "");
+            //System.out.println(neighbors.instance(i).attribute(1).value((int) neighbors.instance(i).value(0)));
+            contenidoIDs.add( neighbors.instance(i).attribute(1).value((int) neighbors.instance(i).value(0)) );
+        }
+
+        //SaveInstanceToArff(dataset,"src/main/resources/datasetWithClassesTest.arff");
+
+        return contenidoIDs;
     }
 
 }
